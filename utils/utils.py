@@ -63,16 +63,54 @@ def get_pytorch_kobert_model(ctx="cpu", cachedir=".cache"):
 
 def extract_data(filename):
     ret = list()
+    _, vocab = get_pytorch_kobert_model()
+    pad = vocab.encode("[PAD]")
     with open(filename, "r") as f:
         data = json.load(f)
         data = data["data"]
 
-    for pair in data["paragraphs"]:
-        context = pair["context"]
-        for qa in pair["qas"]:
-            question = qa["question"]
-            answer_txt = qa["answers"][0]["text"]
-            answer_start = qa["answers"][0]["answer_start"]
-            ret.append([f"[CLS] {context} [SEP] {question} [SEP]", [answer_start, answer_txt]])
+    exceed_count = 0
+    total_count = 0
+    for d in data:
+        for pair in d["paragraphs"]:
+            context = pair["context"]
+            for qa in pair["qas"]:
+                qa_id = qa["id"]
+                question = qa["question"]
+                answer_txt = qa["answers"][0]["text"]
+                answer_start = qa["answers"][0]["answer_start"]
 
+                # get encoded input txt
+                input_str = f"[CLS] {question} [SEP] {context}"
+                input_encoded = vocab.encode(input_str, out_type=int)
+                attention_mask = [1] * len(input_encoded)
+                total_count += 1
+                if len(input_encoded) > 512:
+                    # print("WARNING: input string token is over 512")
+                    # print(f"\t{input_str}")
+                    input_encoded = input_encoded[:512]
+                    exceed_count += 1
+                else:
+                    input_encoded += [pad] * (512 - len(input_encoded))
+                    attention_mask += [0] * (512 - len(input_encoded))
+
+                first_sep_idx = input_encoded.index(vocab.piece_to_id("[SEP]"))
+                token_type_ids = [0] * (first_sep_idx + 1) + [1] * (512 - len(input_encoded))
+
+                # get target start end pos
+                proto = vocab.encode_as_immutable_proto(input_str)
+                answer_start += 5
+                answer_end = answer_start + len(answer_txt) - 1
+                ret_answer_start = -1
+                ret_answer_end = -1
+                for idx, p in enumerate(proto.pieces):
+                    if p.begin <= answer_start < p.end:
+                        ret_answer_start = idx
+                    if p.begin <= answer_end < p.end:
+                        ret_answer_end = idx
+
+                # input: [input_ids, attention_mask, token_type_ids]
+                # target: [start_pos, end_pos, qa_id]
+                ret.append([[input_encoded, attention_mask, token_type_ids], [ret_answer_start, ret_answer_end, qa_id]])
+    print(f"WARNING: {exceed_count}/{total_count} elements exceed 512 ({exceed_count / total_count * 100:.4f} %)")
     return ret
