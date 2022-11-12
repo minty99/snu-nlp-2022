@@ -1,0 +1,31 @@
+[tool.poetry]
+name = "snu-nlp-2022"
+version = "1.0.0"
+description = "Final Project of Introduction to NLP (Fall 2022)"
+authors = ["Muhwan Kim <mhkim4886@gmail.com>"]
+readme = "README.md"
+packages = [{include = "snu_nlp_2022"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+torch = "1.12.1"
+torchaudio = "0.12.0"
+torchvision = "0.13.1"
+pandas = "^1.5.1"
+jupyter = "^1.0.0"
+ipython = "^8.6.0"
+numpy = "^1.23.4"
+matplotlib = "^3.6.2"
+plotly = "^5.11.0"
+hydra-core = "^1.2.0"
+
+[tool.poetry.group.dev.dependencies]
+black = "^22.10.0"
+flake8 = "^5.0.4"
+pre-commit = "^2.20.0"
+isort = "^5.10.1"
+pyright = "^1.1.279"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
