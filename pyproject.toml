@@ -22,6 +22,8 @@ transformers = "^4.24.0"
 poetry-dotenv-plugin = "^0.1.0"
 gluonnlp = "^0.10.0"
 wandb = "^0.13.5"
+boto3 = "^1.26.8"
+sentencepiece = "^0.1.97"
 
 [tool.poetry.group.dev.dependencies]
 black = "^22.10.0"
