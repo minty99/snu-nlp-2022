@@ -9,6 +9,8 @@ from prefetch_generator import BackgroundGenerator
 from torch.utils.data import DataLoader, Dataset
 from torch.utils.data.distributed import DistributedSampler
 
+from utils.utils import extract_data
+
 
 class DataloaderMode(Enum):
     train = auto()
@@ -67,15 +69,8 @@ class Dataset_(Dataset):
             self.data_file = self.cfg.data.test_file
         else:
             raise ValueError(f"invalid dataloader mode {mode}")
-        # self.dataset_files = sorted(
-        #     map(
-        #         os.path.abspath,
-        #         glob.glob(os.path.join(self.data_dir, self.cfg.data.file_format)),
-        #     )
-        # )
-        # self.dataset = list()
-        # for dataset_file in self.dataset_files:
-        #     pass
+
+        self.dataset = extract_data(self.data_file)
 
     def __len__(self):
         return len(self.dataset)
