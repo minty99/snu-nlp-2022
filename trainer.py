@@ -72,20 +72,6 @@ def train_loop(rank, cfg):
         logger.info("Set up train process")
         logger.info("BackgroundGenerator is turned off when Distributed running is on")
 
-        # download MNIST dataset before making dataloader
-        # TODO: This is example code. You should change this part as you need
-        _ = torchvision.datasets.MNIST(
-            root=hydra.utils.to_absolute_path("dataset/meta"),
-            train=True,
-            transform=torchvision.transforms.ToTensor(),
-            download=True,
-        )
-        _ = torchvision.datasets.MNIST(
-            root=hydra.utils.to_absolute_path("dataset/meta"),
-            train=False,
-            transform=torchvision.transforms.ToTensor(),
-            download=True,
-        )
     # Sync dist processes (because of download MNIST Dataset)
     if cfg.dist.gpus != 0:
         dist.barrier()
@@ -143,7 +129,7 @@ def train_loop(rank, cfg):
             cleanup()
 
 
-@hydra.main(config_path="config", config_name="default")
+@hydra.main(version_base="1.1", config_path="config", config_name="default")
 def main(hydra_cfg):
     hydra_cfg.device = hydra_cfg.device.lower()
     with open_dict(hydra_cfg):
