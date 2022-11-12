@@ -66,7 +66,7 @@ def train_loop(rank, cfg):
         writer = Writer(cfg, "tensorboard")
         cfg_str = OmegaConf.to_yaml(cfg)
         logger.info("Config:\n" + cfg_str)
-        if cfg.data.train_dir == "" or cfg.data.test_dir == "":
+        if cfg.data.train_file == "" or cfg.data.test_file == "":
             logger.error("train or test data directory cannot be empty.")
             raise Exception("Please specify directories of data")
         logger.info("Set up train process")
