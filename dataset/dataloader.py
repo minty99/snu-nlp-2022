@@ -5,7 +5,6 @@ from enum import Enum, auto
 import hydra
 import torch
 import torchvision
-from prefetch_generator import BackgroundGenerator
 from torch.utils.data import DataLoader, Dataset
 from torch.utils.data.distributed import DistributedSampler
 
@@ -18,17 +17,7 @@ class DataloaderMode(Enum):
     inference = auto()
 
 
-class DataLoader_(DataLoader):
-    # ref: https://github.com/IgorSusmelj/pytorch-styleguide/issues/5#issuecomment-495090086
-    def __iter__(self):
-        return BackgroundGenerator(super().__iter__())
-
-
 def create_dataloader(cfg, mode, rank):
-    if cfg.data.use_background_generator:
-        data_loader = DataLoader_
-    else:
-        data_loader = DataLoader
     dataset = Dataset_(cfg, mode)
     train_use_shuffle = True
     sampler = None
@@ -36,7 +25,7 @@ def create_dataloader(cfg, mode, rank):
         sampler = DistributedSampler(dataset, cfg.dist.gpus, rank)
         train_use_shuffle = False
     if mode is DataloaderMode.train:
-        return data_loader(
+        return DataLoader(
             dataset=dataset,
             batch_size=cfg.train.batch_size,
             shuffle=train_use_shuffle,
@@ -46,7 +35,7 @@ def create_dataloader(cfg, mode, rank):
             drop_last=True,
         )
     elif mode is DataloaderMode.test:
-        return data_loader(
+        return DataLoader(
             dataset=dataset,
             batch_size=cfg.test.batch_size,
             shuffle=False,
@@ -70,10 +59,19 @@ class Dataset_(Dataset):
         else:
             raise ValueError(f"invalid dataloader mode {mode}")
 
-        self.dataset = extract_data(self.data_file)
+        self.x, self.y = extract_data(os.path.join(self.cfg.working_dir, self.data_file))
+        self.x["input_ids"] = torch.tensor(self.x["input_ids"], dtype=torch.int)
+        self.x["attention_mask"] = torch.tensor(self.x["attention_mask"], dtype=torch.int)
+        self.x["token_type_ids"] = torch.tensor(self.x["token_type_ids"], dtype=torch.int)
 
     def __len__(self):
-        return len(self.dataset)
+        return len(self.x["input_ids"])
 
     def __getitem__(self, idx):
-        return self.dataset[idx]
+        return (
+            self.x["input_ids"][idx],
+            self.x["attention_mask"][idx],
+            self.x["token_type_ids"][idx],
+            self.y["start"][idx],
+            self.y["end"][idx],
+        )

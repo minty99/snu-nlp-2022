@@ -3,6 +3,7 @@ import logging
 import os
 import random
 import subprocess
+from collections import defaultdict
 from datetime import datetime
 from zipfile import ZipFile
 
@@ -62,9 +63,10 @@ def get_pytorch_kobert_model(ctx="cpu", cachedir=".cache"):
 
 
 def extract_data(filename):
-    ret = list()
+    x = defaultdict(list)
+    y = defaultdict(list)
     _, vocab = get_pytorch_kobert_model()
-    pad = vocab.encode("[PAD]")
+    pad = vocab.piece_to_id("[PAD]")
     with open(filename, "r") as f:
         data = json.load(f)
         data = data["data"]
@@ -73,6 +75,8 @@ def extract_data(filename):
     total_count = 0
     for d in data:
         for pair in d["paragraphs"]:
+            if total_count > 100:
+                break  # TODO: for debug
             context = pair["context"]
             for qa in pair["qas"]:
                 qa_id = qa["id"]
@@ -89,13 +93,14 @@ def extract_data(filename):
                     # print("WARNING: input string token is over 512")
                     # print(f"\t{input_str}")
                     input_encoded = input_encoded[:512]
+                    attention_mask = attention_mask[:512]
                     exceed_count += 1
                 else:
                     input_encoded += [pad] * (512 - len(input_encoded))
-                    attention_mask += [0] * (512 - len(input_encoded))
+                    attention_mask += [0] * (512 - len(attention_mask))
 
                 first_sep_idx = input_encoded.index(vocab.piece_to_id("[SEP]"))
-                token_type_ids = [0] * (first_sep_idx + 1) + [1] * (512 - len(input_encoded))
+                token_type_ids = [0] * (first_sep_idx + 1) + [1] * (512 - (first_sep_idx + 1))
 
                 # get target start end pos
                 proto = vocab.encode_as_immutable_proto(input_str)
@@ -111,6 +116,12 @@ def extract_data(filename):
 
                 # input: [input_ids, attention_mask, token_type_ids]
                 # target: [start_pos, end_pos, qa_id]
-                ret.append([[input_encoded, attention_mask, token_type_ids], [ret_answer_start, ret_answer_end, qa_id]])
+                x["input_ids"].append(input_encoded)
+                x["attention_mask"].append(attention_mask)
+                x["token_type_ids"].append(token_type_ids)
+                y["start"].append(ret_answer_start)
+                y["end"].append(ret_answer_end)
+                y["qa_id"].append(qa_id)
+
     print(f"WARNING: {exceed_count}/{total_count} elements exceed 512 ({exceed_count / total_count * 100:.4f} %)")
-    return ret
+    return x, y

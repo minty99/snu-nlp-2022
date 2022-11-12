@@ -26,9 +26,7 @@ class Model:
         # init optimizer
         optimizer_mode = self.cfg.train.optimizer.mode
         if optimizer_mode == "adam":
-            self.optimizer = torch.optim.Adam(
-                self.net.parameters(), **(self.cfg.train.optimizer[optimizer_mode])
-            )
+            self.optimizer = torch.optim.Adam(self.net.parameters(), **(self.cfg.train.optimizer[optimizer_mode]))
         else:
             raise Exception("%s optimizer not supported" % optimizer_mode)
 
@@ -39,8 +37,9 @@ class Model:
     def optimize_parameters(self, model_input, model_target):
         self.net.train()
         self.optimizer.zero_grad()
+        model_target = torch.stack([item.to(self.device) for item in model_target], dim=-1)
         output = self.run_network(model_input)
-        loss_v = self.loss_f(output, model_target.to(self.device))
+        loss_v = self.loss_f(output, model_target)
         loss_v.backward()
         self.optimizer.step()
         # set log
@@ -52,7 +51,7 @@ class Model:
         return output
 
     def run_network(self, model_input):
-        model_input = model_input.to(self.device)
+        model_input = [item.to(self.device) for item in model_input]
         output = self.net(model_input)
         return output
 
@@ -94,9 +93,7 @@ class Model:
 
         self.net.load_state_dict(loaded_clean_net, strict=self.cfg.load.strict_load)
         if is_logging_process() and add_log:
-            self._logger.info(
-                "Checkpoint %s is loaded" % self.cfg.load.network_chkpt_path
-            )
+            self._logger.info("Checkpoint %s is loaded" % self.cfg.load.network_chkpt_path)
 
     def save_training_state(self):
         if is_logging_process():
@@ -131,6 +128,4 @@ class Model:
         self.step = resume_state["step"]
         self.epoch = resume_state["epoch"]
         if is_logging_process():
-            self._logger.info(
-                "Resuming from training state: %s" % self.cfg.load.resume_state_path
-            )
+            self._logger.info("Resuming from training state: %s" % self.cfg.load.resume_state_path)

@@ -14,7 +14,7 @@ class Net_arch(nn.Module):
 
     def forward(self, x):
         # n_words = 512 (max)
-        x, _ = self.bert(x)  # [N, n_words, 768]
+        x, _ = self.bert(*x)  # [N, n_words, 768]
         F.dropout(x, 0.5, training=self.training, inplace=True)
         x = self.fc(x)  # [N, n_words, 768] -> [N, n_words, 2]
 
