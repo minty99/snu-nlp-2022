@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 import random
@@ -58,3 +59,20 @@ def get_pytorch_kobert_model(ctx="cpu", cachedir=".cache"):
     # download vocab
     vocab_path = get_tokenizer()
     return get_kobert_model(model_path, vocab_path, ctx)
+
+
+def extract_data(filename):
+    ret = list()
+    with open(filename, "r") as f:
+        data = json.load(f)
+        data = data["data"]
+
+    for pair in data["paragraphs"]:
+        context = pair["context"]
+        for qa in pair["qas"]:
+            question = qa["question"]
+            answer_txt = qa["answers"][0]["text"]
+            answer_start = qa["answers"][0]["answer_start"]
+            ret.append([f"[CLS] {context} [SEP] {question} [SEP]", [answer_start, answer_txt]])
+
+    return ret
