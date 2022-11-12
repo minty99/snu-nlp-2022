@@ -15,11 +15,12 @@
 
 import os
 from zipfile import ZipFile
+
+import sentencepiece as sp
 import torch
 from transformers import BertModel
-import gluonnlp as nlp
 
-from kobert import download, get_tokenizer
+from utils.kobert_utils import download, get_tokenizer
 
 
 def get_pytorch_kobert_model(ctx="cpu", cachedir=".cache"):
@@ -28,8 +29,9 @@ def get_pytorch_kobert_model(ctx="cpu", cachedir=".cache"):
         device = torch.device(ctx)
         bertmodel.to(device)
         bertmodel.eval()
-        vocab_b_obj = nlp.vocab.BERTVocab.from_sentencepiece(vocab_file, padding_token="[PAD]")
-        return bertmodel, vocab_b_obj
+        vocab = sp.SentencePieceProcessor()
+        vocab.load(vocab_file)
+        return bertmodel, vocab
 
     pytorch_kobert = {
         "url": "s3://skt-lsl-nlp-model/KoBERT/models/kobert_v1.zip",
@@ -49,9 +51,6 @@ def get_pytorch_kobert_model(ctx="cpu", cachedir=".cache"):
 
 
 if __name__ == "__main__":
-    import torch
-    from kobert import get_pytorch_kobert_model
-
     input_ids = torch.LongTensor([[31, 51, 99], [15, 5, 0]])
     input_mask = torch.LongTensor([[1, 1, 1], [1, 1, 0]])
     token_type_ids = torch.LongTensor([[0, 0, 1], [0, 1, 0]])
