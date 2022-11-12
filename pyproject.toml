@@ -4,7 +4,7 @@ version = "1.0.0"
 description = "Final Project of Introduction to NLP (Fall 2022)"
 authors = ["Muhwan Kim <mhkim4886@gmail.com>"]
 readme = "README.md"
-packages = [{include = "snu_nlp_2022"}]
+packages = []
 
 [tool.poetry.dependencies]
 python = "^3.10"

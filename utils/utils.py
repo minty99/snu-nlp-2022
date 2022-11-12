@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import pickle as pk
 import random
 import subprocess
 from collections import defaultdict
@@ -63,6 +64,11 @@ def get_pytorch_kobert_model(ctx="cpu", cachedir=".cache"):
 
 
 def extract_data(filename):
+    if os.path.exists(f".cache/{os.path.basename(filename)}.pk"):
+        with open(f".cache/{os.path.basename(filename)}.pk", "rb") as cache_file:
+            x, y = pk.load(cache_file)
+            return x, y
+
     x = defaultdict(list)
     y = defaultdict(list)
     _, vocab = get_pytorch_kobert_model()
@@ -111,6 +117,8 @@ def extract_data(filename):
                         ret_answer_start = idx
                     if p.begin <= answer_end < p.end:
                         ret_answer_end = idx
+                if ret_answer_start >= 512 or ret_answer_end >= 512:
+                    continue
 
                 # input: [input_ids, attention_mask, token_type_ids]
                 # target: [start_pos, end_pos, qa_id]
@@ -122,4 +130,8 @@ def extract_data(filename):
                 y["qa_id"].append(qa_id)
 
     print(f"WARNING: {exceed_count}/{total_count} elements exceed 512 ({exceed_count / total_count * 100:.4f} %)")
+
+    os.makedirs(".cache", exist_ok=True)
+    with open(f".cache/{os.path.basename(filename)}.pk", "wb") as cache_file:
+        pk.dump((x, y), cache_file)
     return x, y
