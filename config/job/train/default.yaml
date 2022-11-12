@@ -3,7 +3,7 @@ name: 'First_training'
 working_dir: ???
 device: 'mps'
 random_seed: ~
-num_epoch: 10000  # max iteration
+num_epoch: 1  # max iteration
 data:
   train_file: 'dataset/meta/KorQuAD_v1.0_train.json'
   test_file: 'dataset/meta/KorQuAD_v1.0_dev.json'
