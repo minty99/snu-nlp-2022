@@ -20,7 +20,7 @@ import sentencepiece as sp
 import torch
 from transformers import BertModel
 
-from utils.utils import get_pytorch_kobert_model
+from utils.utils import extract_data, get_pytorch_kobert_model
 
 
 def main():
@@ -32,6 +32,7 @@ def main():
     print(pooled_output.shape)
     print(vocab)
     print(sequence_output[0])
+    extract_data("dataset/meta/KorQuAD_v1.0_dev.json")
 
 
 if __name__ == "__main__":
