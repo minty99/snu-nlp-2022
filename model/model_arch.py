@@ -11,6 +11,10 @@ class Net_arch(nn.Module):
         self.cfg = cfg
         self.bert, _ = get_pytorch_kobert_model(ctx=cfg.device)
         self.fc = nn.Linear(768, 2)
+        for param in self.parameters():
+            param.requires_grad = False
+        for param in self.fc.parameters():
+            param.requires_grad = True
 
     def forward(self, x):
         # n_words = 512 (max)
