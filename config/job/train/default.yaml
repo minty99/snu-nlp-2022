@@ -1,19 +1,19 @@
 # @package _global_
-name: 'First_training'
+name: "NLP Final Project"
 working_dir: ???
-device: 'mps'
+device: "mps"
 random_seed: ~
-num_epoch: 1  # max iteration
+num_epoch: 1 # max iteration
 data:
-  train_file: 'dataset/meta/KorQuAD_v1.0_train.json'
-  test_file: 'dataset/meta/KorQuAD_v1.0_dev.json'
-  file_format: '*.file_extension'
+  train_file: "dataset/meta/KorQuAD_v1.0_train.json"
+  test_file: "dataset/meta/KorQuAD_v1.0_dev.json"
+  file_format: "*.file_extension"
   divide_dataset_per_gpu: true
 train:
   num_workers: 4
   batch_size: 64
   optimizer:
-    mode: 'adam'
+    mode: "adam"
     adam:
       lr: 0.001
       betas:
@@ -22,12 +22,11 @@ train:
 test:
   num_workers: 4
   batch_size: 64
-model:
-  ~
+model: ~
 dist:
-  master_addr: 'localhost'
-  master_port: '12355'
-  mode: 'nccl'
+  master_addr: "localhost"
+  master_port: "12355"
+  mode: "nccl"
   gpus: 0 # 0 for not using dist, -1 for using all gpus
   timeout: 30 # seconds for timeout. In nccl mode, set ~ for not using timeout
 log:
@@ -39,7 +38,7 @@ log:
     project: ~
   summary_interval: 1 # interval of step
   chkpt_interval: 10 # interval of epoch
-  chkpt_dir: 'chkpt'
+  chkpt_dir: "chkpt"
 load:
   wandb_load_path: ~
   network_chkpt_path: ~
