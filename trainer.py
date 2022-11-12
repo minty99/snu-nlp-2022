@@ -100,8 +100,14 @@ def train_loop(rank, cfg):
 
     # init Model
     net_arch = Net_arch(cfg)
-    loss_f = torch.nn.CrossEntropyLoss()
-    model = Model(cfg, net_arch, loss_f, rank)
+
+    def qa_loss(output, target):
+        ce = torch.nn.CrossEntropyLoss()
+        # [..., 0]: prob for start position prediction
+        # [..., 1]: prob for end position prediction
+        return ce(output[..., 0], target[..., 0]) + ce(output[..., 1], target[..., 1])
+
+    model = Model(cfg, net_arch, qa_loss, rank)
 
     # load training state / network checkpoint
     if cfg.load.resume_state_path is not None:
