@@ -75,8 +75,6 @@ def extract_data(filename):
     total_count = 0
     for d in data:
         for pair in d["paragraphs"]:
-            if total_count > 100:
-                break  # TODO: for debug
             context = pair["context"]
             for qa in pair["qas"]:
                 qa_id = qa["id"]
