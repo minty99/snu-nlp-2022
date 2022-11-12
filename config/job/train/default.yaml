@@ -1,14 +1,13 @@
 # @package _global_
 name: 'First_training'
 working_dir: ???
-device: 'cuda'
+device: 'mps'
 random_seed: ~
 num_epoch: 10000  # max iteration
 data:
   train_file: 'dataset/meta/KorQuAD_v1.0_train.json'
   test_file: 'dataset/meta/KorQuAD_v1.0_dev.json'
   file_format: '*.file_extension'
-  use_background_generator: true
   divide_dataset_per_gpu: true
 train:
   num_workers: 4
