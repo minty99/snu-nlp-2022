@@ -132,3 +132,6 @@ dmypy.json
 .vscode
 tensorboard
 outputs
+chkpt
+wandb
+trainer.log
