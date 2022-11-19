@@ -1,9 +1,9 @@
 # @package _global_
 name: "NLP Final Project"
 working_dir: ???
-device: "mps"
+device: "cuda"
 random_seed: ~
-num_epoch: 1 # max iteration
+num_epoch: 100 # max iteration
 data:
   train_file: "dataset/meta/KorQuAD_v1.0_train.json"
   test_file: "dataset/meta/KorQuAD_v1.0_dev.json"
@@ -11,7 +11,7 @@ data:
   divide_dataset_per_gpu: true
 train:
   num_workers: 4
-  batch_size: 64
+  batch_size: 128
   optimizer:
     mode: "adam"
     adam:
@@ -21,7 +21,7 @@ train:
         - 0.999
 test:
   num_workers: 4
-  batch_size: 64
+  batch_size: 512
 model: ~
 dist:
   master_addr: "localhost"
@@ -37,7 +37,7 @@ log:
     entity: snu-nlp
     project: KorBert
   summary_interval: 1 # interval of step
-  chkpt_interval: 10 # interval of epoch
+  chkpt_interval: 100 # interval of epoch
   chkpt_dir: "chkpt"
 load:
   wandb_load_path: ~

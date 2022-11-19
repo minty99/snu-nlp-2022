@@ -74,4 +74,5 @@ class Dataset_(Dataset):
             self.x["token_type_ids"][idx],
             self.y["start"][idx],
             self.y["end"][idx],
+            self.y["qa_id"][idx],
         )

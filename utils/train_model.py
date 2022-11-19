@@ -2,13 +2,14 @@ import math
 import os
 
 from utils.utils import get_logger, is_logging_process
+from utils.writer import Writer
 
 
-def train_model(cfg, model, train_loader, writer):
+def train_model(cfg, model, train_loader, writer: Writer):
     logger = get_logger(cfg, os.path.basename(__file__))
     model.net.train()
     for data in train_loader:
-        model_input, model_target = data[:3], data[3:]
+        model_input, model_target = data[:3], data[3:5]
         model.optimize_parameters(model_input, model_target)
         loss = model.log.loss_v
         model.step += 1

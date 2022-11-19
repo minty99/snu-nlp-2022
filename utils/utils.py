@@ -4,6 +4,7 @@ import os
 import pickle as pk
 import random
 import subprocess
+import sys
 from collections import defaultdict
 from datetime import datetime
 from zipfile import ZipFile
@@ -16,6 +17,7 @@ from omegaconf import OmegaConf
 from transformers import BertModel
 
 from utils.kobert_utils import download, get_tokenizer
+from utils.evaluate import evaluate
 
 
 def set_random_seed(seed):
@@ -135,3 +137,15 @@ def extract_data(filename):
     with open(f".cache/{os.path.basename(filename)}.pk", "wb") as cache_file:
         pk.dump((x, y), cache_file)
     return x, y
+
+
+def calc_metric(cfg, predictions):
+    filename = cfg.data.test_file
+    expected_version = "KorQuAD_v1.0"
+    with open(filename) as dataset_file:
+        dataset_json = json.load(dataset_file)
+        read_version = "_".join(dataset_json["version"].split("_")[:-1])
+        if read_version != expected_version:
+            print("Evaluation expects " + expected_version + ", but got dataset with " + read_version, file=sys.stderr)
+        dataset = dataset_json["data"]
+    return evaluate(dataset, predictions)

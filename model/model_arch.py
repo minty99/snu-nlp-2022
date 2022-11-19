@@ -25,10 +25,12 @@ class Net_arch(nn.Module):
     def forward(self, x):
         # n_words = 512 (max)
         x, _ = self.bert(*x)  # [N, n_words, 768]
-        # F.dropout(x, 0.5, training=self.training, inplace=True)
+        # x = F.dropout(x, 0.5)
         x = self.fc1(x)  # [N, n_words, 768] -> [N, n_words, 256]
         x = F.relu(x)
+        # x = F.dropout(x, 0.5)
         x = self.fc2(x)  # [N, n_words, 256] -> [N, n_words, 64]
         x = F.relu(x)
+        # x = F.dropout(x, 0.5)
         x = self.fc3(x)  # [N, n_words, 64] -> [N, n_words, 2]
         return x  # [N, n_words, 2]
