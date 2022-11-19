@@ -22,7 +22,7 @@ train:
         - 0.999
 test:
   num_workers: 4
-  batch_size: 512
+  batch_size: 256
 model: ~
 dist:
   master_addr: "localhost"
