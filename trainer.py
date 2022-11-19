@@ -3,6 +3,7 @@ import datetime
 import itertools
 import os
 import random
+import time
 import traceback
 
 import hydra
@@ -139,6 +140,7 @@ def main(hydra_cfg):
         hydra_cfg.random_seed = random.randint(1, 10000)
     set_random_seed(hydra_cfg.random_seed)
 
+    hydra_cfg.start_time = datetime.datetime.fromtimestamp(time.time()).strftime("%Y-%m-%d %H:%M:%S")
     if hydra_cfg.dist.gpus < 0:
         hydra_cfg.dist.gpus = torch.cuda.device_count()
     if hydra_cfg.device == "cpu" or hydra_cfg.dist.gpus == 0:

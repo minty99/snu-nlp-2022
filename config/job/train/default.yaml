@@ -3,6 +3,7 @@ name: "NLP Final Project"
 working_dir: ???
 device: "cuda"
 random_seed: ~
+start_time: ~
 num_epoch: 100 # max iteration
 data:
   train_file: "dataset/meta/KorQuAD_v1.0_train.json"

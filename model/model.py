@@ -62,7 +62,7 @@ class Model:
             for key, param in state_dict.items():
                 state_dict[key] = param.to("cpu")
             if save_file:
-                save_filename = "%s_%d.pt" % (self.cfg.name, self.step)
+                save_filename = "%s_%s_%d.pt" % (self.cfg.name, self.cfg.start_time, self.step)
                 save_path = osp.join(self.cfg.log.chkpt_dir, save_filename)
                 torch.save(state_dict, save_path)
                 if self.cfg.log.use_wandb:
