@@ -13,6 +13,7 @@ class Net_arch(nn.Module):
         self.fc1 = nn.Linear(768, 256)
         self.fc2 = nn.Linear(256, 64)
         self.fc3 = nn.Linear(64, 2)
+        self.dropout = nn.Dropout(p=0.1)
         # for param in self.parameters():
         #     param.requires_grad = False
         # for param in self.fc1.parameters():
@@ -25,12 +26,12 @@ class Net_arch(nn.Module):
     def forward(self, x):
         # n_words = 512 (max)
         x, _ = self.bert(*x)  # [N, n_words, 768]
-        x = F.dropout(x, 0.1)
+        x = self.dropout(x)
         x = self.fc1(x)  # [N, n_words, 768] -> [N, n_words, 256]
         x = F.relu(x)
-        x = F.dropout(x, 0.1)
+        x = self.dropout(x)
         x = self.fc2(x)  # [N, n_words, 256] -> [N, n_words, 64]
         x = F.relu(x)
-        x = F.dropout(x, 0.1)
+        x = self.dropout(x)
         x = self.fc3(x)  # [N, n_words, 64] -> [N, n_words, 2]
         return x  # [N, n_words, 2]
