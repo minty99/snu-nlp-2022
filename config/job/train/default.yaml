@@ -4,7 +4,7 @@ working_dir: ???
 device: "cuda"
 random_seed: ~
 start_time: ~
-num_epoch: 100 # max iteration
+num_epoch: 20 # max iteration
 data:
   train_file: "dataset/meta/KorQuAD_v1.0_train.json"
   test_file: "dataset/meta/KorQuAD_v1.0_dev.json"
@@ -12,11 +12,11 @@ data:
   divide_dataset_per_gpu: true
 train:
   num_workers: 4
-  batch_size: 64
+  batch_size: 32
   optimizer:
     mode: "adam"
     adam:
-      lr: 0.001
+      lr: 5e-5
       betas:
         - 0.9
         - 0.999
@@ -38,7 +38,7 @@ log:
     entity: snu-nlp
     project: KorBert
   summary_interval: 1 # interval of step
-  chkpt_interval: 100 # interval of epoch
+  chkpt_interval: 1 # interval of epoch
   chkpt_dir: "chkpt"
 load:
   wandb_load_path: ~
