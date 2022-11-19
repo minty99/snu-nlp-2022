@@ -97,7 +97,7 @@ class Model:
 
     def save_training_state(self):
         if is_logging_process():
-            save_filename = "%s_%d.state" % (self.cfg.name, self.step)
+            save_filename = "%s_%s_%d.state" % (self.cfg.name, self.cfg.start_time, self.step)
             save_path = osp.join(self.cfg.log.chkpt_dir, save_filename)
             net_state_dict = self.save_network(False)
             state = {
