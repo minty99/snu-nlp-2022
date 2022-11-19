@@ -110,7 +110,7 @@ def extract_data(filename):
 
                 # get target start end pos
                 proto = vocab.encode_as_immutable_proto(input_str)
-                answer_start += 5
+                answer_start += input_str.find("[SEP]") + 6
                 answer_end = answer_start + len(answer_txt) - 1
                 ret_answer_start = -1
                 ret_answer_end = -1
