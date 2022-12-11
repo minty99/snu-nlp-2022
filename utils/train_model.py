@@ -23,3 +23,5 @@ def train_model(cfg, model, train_loader, writer: Writer):
                 writer.logging_with_step(loss, model.step, "train_loss")
             if is_logging_process():
                 logger.info("Train Loss %.04f at step %d" % (loss, model.step))
+
+    model.update_learning_rate(writer)

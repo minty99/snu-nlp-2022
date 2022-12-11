@@ -129,3 +129,11 @@ class Model:
         self.epoch = resume_state["epoch"]
         if is_logging_process():
             self._logger.info("Resuming from training state: %s" % self.cfg.load.resume_state_path)
+
+    def update_learning_rate(self, writer=None):
+        step_size = (self.cfg.train.scheduler.max_lr - self.cfg.train.scheduler.min_lr) / self.cfg.num_epoch
+        lr = self.cfg.train.scheduler.max_lr - step_size * self.epoch
+        for param_group in self.optimizer.param_groups:
+            param_group["lr"] = lr
+        if writer is not None:
+            writer.logging_with_step(lr, self.step, "lr")

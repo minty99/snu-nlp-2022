@@ -20,6 +20,9 @@ train:
       betas:
         - 0.9
         - 0.999
+  scheduler:
+    max_lr: ${train.optimizer.adam.lr}
+    min_lr: 2e-5
 test:
   num_workers: 4
   batch_size: 128
