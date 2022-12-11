@@ -12,11 +12,11 @@ data:
   divide_dataset_per_gpu: true
 train:
   num_workers: 4
-  batch_size: 64
+  batch_size: 32
   optimizer:
     mode: "adam"
     adam:
-      lr: 7e-5
+      lr: 5e-5
       betas:
         - 0.9
         - 0.999
