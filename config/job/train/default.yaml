@@ -4,7 +4,7 @@ working_dir: ???
 device: "cuda"
 random_seed: ~
 start_time: ~
-num_epoch: 8 # max iteration
+num_epoch: 30 # max iteration
 data:
   train_file: "dataset/meta/KorQuAD_v1.0_train.json"
   test_file: "dataset/meta/KorQuAD_v1.0_dev.json"
@@ -22,7 +22,7 @@ train:
         - 0.999
   scheduler:
     max_lr: ${train.optimizer.adam.lr}
-    min_lr: 2e-5
+    min_lr: 1e-5
 test:
   num_workers: 4
   batch_size: 128
