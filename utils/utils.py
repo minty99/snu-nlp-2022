@@ -66,10 +66,10 @@ def get_pytorch_kobert_model(ctx="cpu", cachedir=".cache"):
 
 
 def extract_data(filename, drop_long=True):
-    if os.path.exists(f".cache/{os.path.basename(filename)}.pk"):
-        with open(f".cache/{os.path.basename(filename)}.pk", "rb") as cache_file:
-            x, y = pk.load(cache_file)
-            return x, y
+    # if os.path.exists(f".cache/{os.path.basename(filename)}.pk"):
+    #     with open(f".cache/{os.path.basename(filename)}.pk", "rb") as cache_file:
+    #         x, y = pk.load(cache_file)
+    #         return x, y
 
     x = defaultdict(list)
     y = defaultdict(list)
@@ -79,7 +79,9 @@ def extract_data(filename, drop_long=True):
         data = json.load(f)
         data = data["data"]
 
-    exceed_count = 0
+    long_count = 0
+    dropped_count = 0
+    label_changed_count = 0
     total_count = 0
     for d in data:
         for pair in d["paragraphs"]:
@@ -100,7 +102,7 @@ def extract_data(filename, drop_long=True):
                     # print(f"\t{input_str}")
                     input_encoded = input_encoded[:512]
                     attention_mask = attention_mask[:512]
-                    exceed_count += 1
+                    long_count += 1
                 else:
                     input_encoded += [pad] * (512 - len(input_encoded))
                     attention_mask += [0] * (512 - len(attention_mask))
@@ -122,6 +124,7 @@ def extract_data(filename, drop_long=True):
 
                 if ret_answer_end >= 512 and drop_long:
                     # Do not add long texts which have answers after 512 into dataset
+                    dropped_count += 1
                     continue
 
                 # Add long texts, but change label into (511, 511) which means no answer in given paragraph
@@ -129,6 +132,7 @@ def extract_data(filename, drop_long=True):
                 if ret_answer_start >= 512:
                     ret_answer_start = 511
                 if ret_answer_end >= 512:
+                    label_changed_count += 1
                     ret_answer_end = 511
 
                 # input: [input_ids, attention_mask, token_type_ids]
@@ -140,7 +144,13 @@ def extract_data(filename, drop_long=True):
                 y["end"].append(ret_answer_end)
                 y["qa_id"].append(qa_id)
 
-    print(f"WARNING: {exceed_count}/{total_count} elements exceed 512 ({exceed_count / total_count * 100:.4f} %)")
+    print(f"WARNING: {long_count}/{total_count} elements exceed 512 ({long_count / total_count * 100:.4f} %)")
+    if drop_long:
+        print(f"WARNING: {dropped_count}/{total_count} elements dropped ({dropped_count / total_count * 100:.4f} %)")
+    if not drop_long:
+        print(
+            f"WARNING: {label_changed_count}/{total_count} elements' label changed ({label_changed_count / total_count * 100:.4f} %)"
+        )
 
     os.makedirs(".cache", exist_ok=True)
     with open(f".cache/{os.path.basename(filename)}.pk", "wb") as cache_file:
