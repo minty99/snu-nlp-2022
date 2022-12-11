@@ -3,10 +3,8 @@ import logging
 import os
 import pickle as pk
 import random
-import subprocess
 import sys
 from collections import defaultdict
-from datetime import datetime
 from zipfile import ZipFile
 
 import numpy as np
@@ -14,7 +12,7 @@ import sentencepiece as sp
 import torch
 import torch.distributed as dist
 from omegaconf import OmegaConf
-from transformers import BertModel
+from transformers import BertTokenizerFast, BertModel
 
 from utils.kobert_utils import download, get_tokenizer
 from utils.evaluate import evaluate
@@ -65,6 +63,20 @@ def get_pytorch_kobert_model(ctx="cpu", cachedir=".cache"):
     return get_kobert_model(model_path, vocab_path, ctx)
 
 
+def get_multilingual_bert_model(ctx="cpu"):
+    model = BertModel.from_pretrained("bert-base-multilingual-cased").to(ctx)
+    return model
+
+
+def get_multilingual_bert_tokenizer():
+    tokenizer = BertTokenizerFast.from_pretrained("bert-base-multilingual-cased")
+    return tokenizer
+
+
+def get_multilingual_bert(ctx="cpu"):
+    return get_multilingual_bert_model(ctx), get_multilingual_bert_tokenizer()
+
+
 def extract_data(filename, drop_long=True):
     # if os.path.exists(f".cache/{os.path.basename(filename)}.pk"):
     #     with open(f".cache/{os.path.basename(filename)}.pk", "rb") as cache_file:
@@ -73,8 +85,8 @@ def extract_data(filename, drop_long=True):
 
     x = defaultdict(list)
     y = defaultdict(list)
-    _, vocab = get_pytorch_kobert_model()
-    pad = vocab.piece_to_id("[PAD]")
+    tokenizer = get_multilingual_bert_tokenizer()
+    pad = tokenizer.convert_tokens_to_ids("[PAD]")
     with open(filename, "r") as f:
         data = json.load(f)
         data = data["data"]
@@ -94,7 +106,7 @@ def extract_data(filename, drop_long=True):
 
                 # get encoded input txt
                 input_str = f"[CLS] {question} [SEP] {context}"
-                input_encoded = vocab.encode(input_str, out_type=int)
+                input_encoded = tokenizer.encode(input_str, add_special_tokens=False)
                 attention_mask = [1] * len(input_encoded)
                 total_count += 1
                 if len(input_encoded) > 512:
@@ -107,19 +119,20 @@ def extract_data(filename, drop_long=True):
                     input_encoded += [pad] * (512 - len(input_encoded))
                     attention_mask += [0] * (512 - len(attention_mask))
 
-                first_sep_idx = input_encoded.index(vocab.piece_to_id("[SEP]"))
+                first_sep_idx = input_encoded.index(tokenizer.convert_tokens_to_ids("[SEP]"))
                 token_type_ids = [0] * (first_sep_idx + 1) + [1] * (512 - (first_sep_idx + 1))
 
                 # get target start end pos
-                proto = vocab.encode_as_immutable_proto(input_str)
+                offsets = tokenizer(input_str, add_special_tokens=False, return_offsets_mapping=True)["offset_mapping"]
                 answer_start += input_str.find("[SEP]") + 6
                 answer_end = answer_start + len(answer_txt) - 1
                 ret_answer_start = -1
                 ret_answer_end = -1
-                for idx, p in enumerate(proto.pieces):
-                    if p.begin <= answer_start < p.end:
+                for idx, p in enumerate(offsets):
+                    begin, end = p
+                    if begin <= answer_start < end:
                         ret_answer_start = idx
-                    if p.begin <= answer_end < p.end:
+                    if begin <= answer_end < end:
                         ret_answer_end = idx
 
                 if ret_answer_end >= 512 and drop_long:

@@ -2,15 +2,20 @@ import os
 
 import torch
 
-from utils.utils import calc_metric, get_logger, get_pytorch_kobert_model, is_logging_process
+from utils.utils import (
+    calc_metric,
+    get_logger,
+    is_logging_process,
+    get_multilingual_bert_tokenizer,
+)
 from utils.writer import Writer
 from functools import lru_cache
 
 
 @lru_cache(maxsize=None)
-def get_vocab():
-    _, vocab = get_pytorch_kobert_model()
-    return vocab
+def get_tokenizer():
+    tokenizer = get_multilingual_bert_tokenizer()
+    return tokenizer
 
 
 def test_model(cfg, model, test_loader, writer: Writer):
@@ -18,7 +23,7 @@ def test_model(cfg, model, test_loader, writer: Writer):
     model.net.eval()
     total_test_loss = 0
     test_loop_len = 0
-    vocab = get_vocab()
+    tokenizer = get_tokenizer()
     texts = dict()
     with torch.no_grad():
         for data in test_loader:
@@ -42,7 +47,7 @@ def test_model(cfg, model, test_loader, writer: Writer):
                 pred_start = start[i]
                 pred_end = pred_start + torch.argmax(output[i, 1, pred_start:], dim=-1)
                 pred_text = input_text[pred_start : pred_end + 1].tolist()
-                decoded_text = vocab.decode(pred_text)
+                decoded_text = tokenizer.decode(pred_text)
                 texts[qa_id[i]] = decoded_text
 
             test_loop_len += 1

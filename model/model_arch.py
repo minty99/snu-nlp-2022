@@ -1,7 +1,7 @@
 import torch.nn as nn
 import torch.nn.functional as F
 
-from kobert import get_pytorch_kobert_model
+from utils.utils import get_multilingual_bert_model
 
 
 class Net_arch(nn.Module):
@@ -9,7 +9,7 @@ class Net_arch(nn.Module):
     def __init__(self, cfg):
         super(Net_arch, self).__init__()
         self.cfg = cfg
-        self.bert, _ = get_pytorch_kobert_model(ctx=cfg.device)
+        self.bert = get_multilingual_bert_model(ctx=cfg.device)
         self.fc1 = nn.Linear(768, 256)
         self.fc2 = nn.Linear(256, 64)
         self.fc3 = nn.Linear(64, 2)
@@ -25,7 +25,7 @@ class Net_arch(nn.Module):
 
     def forward(self, x):
         # n_words = 512 (max)
-        x, _ = self.bert(*x)  # [N, n_words, 768]
+        x = self.bert(*x).last_hidden_state  # [N, n_words, 768]
         x = self.dropout(x)
         x = self.fc1(x)  # [N, n_words, 768] -> [N, n_words, 256]
         x = F.relu(x)
