@@ -119,8 +119,11 @@ def extract_data(filename):
                         ret_answer_start = idx
                     if p.begin <= answer_end < p.end:
                         ret_answer_end = idx
-                if ret_answer_start >= 512 or ret_answer_end >= 512:
-                    continue
+
+                if ret_answer_start >= 512:
+                    ret_answer_start = 511
+                if ret_answer_end >= 512:
+                    ret_answer_end = 511
 
                 # input: [input_ids, attention_mask, token_type_ids]
                 # target: [start_pos, end_pos, qa_id]
