@@ -35,11 +35,12 @@ def test_model(cfg, model, test_loader, writer: Writer):
 
             # Calculate QA metrics
             output = output.mT  # [batch, num_words, 2] -> [batch, 2, num_words]
-            pred = torch.argmax(output, dim=-1)  # [batch, 2]
+            start = torch.argmax(output[..., 0, :], dim=-1)  # [batch, 2, num_words] -> [batch]
             batch_size = model_input[0].shape[0]
             for i in range(batch_size):
                 input_text = model_input[0][i]
-                pred_start, pred_end = pred[i]
+                pred_start = start[i]
+                pred_end = pred_start + torch.argmax(output[i, 1, pred_start:], dim=-1)
                 pred_text = input_text[pred_start : pred_end + 1].tolist()
                 decoded_text = vocab.decode(pred_text)
                 texts[qa_id[i]] = decoded_text
