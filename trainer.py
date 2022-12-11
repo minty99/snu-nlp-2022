@@ -92,7 +92,7 @@ def train_loop(rank, cfg):
         ce = torch.nn.CrossEntropyLoss()
         # [..., 0]: prob for start position prediction
         # [..., 1]: prob for end position prediction
-        return ce(output[..., 0], target[..., 0]) + ce(output[..., 1], target[..., 1])
+        return (ce(output[..., 0], target[..., 0]) + ce(output[..., 1], target[..., 1])) / 2.0
 
     model = Model(cfg, net_arch, qa_loss, rank)
 
