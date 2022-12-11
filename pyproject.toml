@@ -24,6 +24,7 @@ boto3 = "^1.26.8"
 sentencepiece = "^0.1.97"
 tensorboard = "^2.11.0"
 hydra-colorlog = "^1.2.0"
+tqdm = "^4.64.1"
 
 [tool.poetry.group.dev.dependencies]
 black = "^22.10.0"

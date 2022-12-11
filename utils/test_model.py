@@ -55,6 +55,6 @@ def test_model(cfg, model, test_loader, writer: Writer):
             writer.logging_with_step(metric["f1"], model.step, "F1")
         if is_logging_process():
             logger.info(
-                "Test Loss %.04f / EM %.04f / F1 %.04f at step %d"
-                % (total_test_loss, metric["exact_match"], metric["f1"], model.step)
+                "Test Loss %.04f / EM %.04f / F1 %.04f at (step %d / epoch %d)"
+                % (total_test_loss, metric["exact_match"], metric["f1"], model.step, model.epoch)
             )
