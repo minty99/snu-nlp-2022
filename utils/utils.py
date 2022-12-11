@@ -120,8 +120,8 @@ def extract_data(filename, drop_long=True):
                     if p.begin <= answer_end < p.end:
                         ret_answer_end = idx
 
-                if drop_long:
-                    # Do not add long texts into dataset
+                if ret_answer_end >= 512 and drop_long:
+                    # Do not add long texts which have answers after 512 into dataset
                     continue
 
                 # Add long texts, but change label into (511, 511) which means no answer in given paragraph
