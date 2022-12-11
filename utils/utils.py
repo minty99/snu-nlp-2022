@@ -15,6 +15,7 @@ import torch
 import torch.distributed as dist
 from omegaconf import OmegaConf
 from transformers import BertModel
+from dataset.dataloader import DataloaderMode
 
 from utils.kobert_utils import download, get_tokenizer
 from utils.evaluate import evaluate
@@ -65,7 +66,7 @@ def get_pytorch_kobert_model(ctx="cpu", cachedir=".cache"):
     return get_kobert_model(model_path, vocab_path, ctx)
 
 
-def extract_data(filename):
+def extract_data(filename, mode=DataloaderMode.train):
     if os.path.exists(f".cache/{os.path.basename(filename)}.pk"):
         with open(f".cache/{os.path.basename(filename)}.pk", "rb") as cache_file:
             x, y = pk.load(cache_file)
@@ -119,6 +120,9 @@ def extract_data(filename):
                         ret_answer_start = idx
                     if p.begin <= answer_end < p.end:
                         ret_answer_end = idx
+
+                if mode == DataloaderMode.train:
+                    continue
 
                 if ret_answer_start >= 512:
                     ret_answer_start = 511
