@@ -59,7 +59,10 @@ class Dataset_(Dataset):
         else:
             raise ValueError(f"invalid dataloader mode {mode}")
 
-        self.x, self.y = extract_data(os.path.join(self.cfg.working_dir, self.data_file), mode)
+        # Train: drop long text
+        self.x, self.y = extract_data(
+            os.path.join(self.cfg.working_dir, self.data_file), drop_long=(mode is DataloaderMode.train)
+        )
         self.x["input_ids"] = torch.tensor(self.x["input_ids"], dtype=torch.int)
         self.x["attention_mask"] = torch.tensor(self.x["attention_mask"], dtype=torch.int)
         self.x["token_type_ids"] = torch.tensor(self.x["token_type_ids"], dtype=torch.int)

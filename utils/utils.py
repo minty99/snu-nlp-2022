@@ -15,7 +15,6 @@ import torch
 import torch.distributed as dist
 from omegaconf import OmegaConf
 from transformers import BertModel
-from dataset.dataloader import DataloaderMode
 
 from utils.kobert_utils import download, get_tokenizer
 from utils.evaluate import evaluate
@@ -66,7 +65,7 @@ def get_pytorch_kobert_model(ctx="cpu", cachedir=".cache"):
     return get_kobert_model(model_path, vocab_path, ctx)
 
 
-def extract_data(filename, mode=DataloaderMode.train):
+def extract_data(filename, drop_long=True):
     if os.path.exists(f".cache/{os.path.basename(filename)}.pk"):
         with open(f".cache/{os.path.basename(filename)}.pk", "rb") as cache_file:
             x, y = pk.load(cache_file)
@@ -121,9 +120,12 @@ def extract_data(filename, mode=DataloaderMode.train):
                     if p.begin <= answer_end < p.end:
                         ret_answer_end = idx
 
-                if mode == DataloaderMode.train:
+                if drop_long:
+                    # Do not add long texts into dataset
                     continue
 
+                # Add long texts, but change label into (511, 511) which means no answer in given paragraph
+                # This can make the test loss errorneous
                 if ret_answer_start >= 512:
                     ret_answer_start = 511
                 if ret_answer_end >= 512:
