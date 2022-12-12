@@ -78,10 +78,10 @@ def get_multilingual_bert(ctx="cpu"):
 
 
 def extract_data(filename, drop_long=True):
-    # if os.path.exists(f".cache/{os.path.basename(filename)}.pk"):
-    #     with open(f".cache/{os.path.basename(filename)}.pk", "rb") as cache_file:
-    #         x, y = pk.load(cache_file)
-    #         return x, y
+    if os.path.exists(f".cache/{os.path.basename(filename)}.pk"):
+        with open(f".cache/{os.path.basename(filename)}.pk", "rb") as cache_file:
+            x, y = pk.load(cache_file)
+            return x, y
 
     x = defaultdict(list)
     y = defaultdict(list)
