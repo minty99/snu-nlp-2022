@@ -89,7 +89,7 @@ def train_loop(rank, cfg):
     net_arch = Net_arch(cfg)
 
     def qa_loss(output, target):
-        ce = torch.nn.CrossEntropyLoss()
+        ce = torch.nn.CrossEntropyLoss(label_smoothing=cfg.loss.label_smoothing)
         # [..., 0]: prob for start position prediction
         # [..., 1]: prob for end position prediction
         return (ce(output[..., 0], target[..., 0]) + ce(output[..., 1], target[..., 1])) / 2.0

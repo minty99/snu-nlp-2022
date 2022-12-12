@@ -27,6 +27,8 @@ test:
   num_workers: 4
   batch_size: 128
 model: ~
+loss:
+  label_smoothing: 0.1
 dist:
   master_addr: "localhost"
   master_port: "12355"
