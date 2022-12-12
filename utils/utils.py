@@ -130,10 +130,12 @@ def extract_data(filename, drop_long=True):
                 ret_answer_end = -1
                 for idx, p in enumerate(offsets):
                     begin, end = p
-                    if begin <= answer_start < end:
+                    if ret_answer_start == -1 and begin <= answer_start < end:
                         ret_answer_start = idx
-                    if begin <= answer_end < end:
+                    if ret_answer_end == -1 and begin <= answer_end < end:
                         ret_answer_end = idx
+                    elif ret_answer_end == -1 and begin > answer_end:
+                        ret_answer_end = idx - 1
 
                 if ret_answer_end >= 512 and drop_long:
                     # Do not add long texts which have answers after 512 into dataset
