@@ -20,7 +20,7 @@ from model.model import Model
 from model.model_arch import Net_arch
 from utils.test_model import test_model
 from utils.train_model import train_model
-from utils.utils import get_logger, is_logging_process, set_random_seed
+from utils.utils import get_logger, is_logging_process, set_random_seed, soft_argmax
 from utils.writer import Writer
 
 
@@ -92,7 +92,16 @@ def train_loop(rank, cfg):
         ce = torch.nn.CrossEntropyLoss(label_smoothing=cfg.loss.label_smoothing)
         # [..., 0]: prob for start position prediction
         # [..., 1]: prob for end position prediction
-        return (ce(output[..., 0], target[..., 0]) + ce(output[..., 1], target[..., 1])) / 2.0
+        start = soft_argmax(output[..., 0])
+        end = soft_argmax(output[..., 1])
+        zero = torch.zeros(start.shape, device=start.device)
+        order_const = cfg.loss.order_const
+
+        return (
+            ce(output[..., 0], target[..., 0])
+            + ce(output[..., 1], target[..., 1])
+            + order_const * torch.mean(torch.log(torch.maximum(start - end, zero) + 1))
+        ) / 3.0
 
     model = Model(cfg, net_arch, qa_loss, rank)
 

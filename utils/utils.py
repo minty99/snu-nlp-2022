@@ -47,6 +47,11 @@ def get_multilingual_bert(ctx="cpu"):
     return get_multilingual_bert_model(ctx), get_multilingual_bert_tokenizer()
 
 
+def soft_argmax(x: torch.Tensor, beta=1e10):
+    x_range = torch.arange(0, x.shape[-1]).to(x.device)
+    return torch.sum(torch.softmax(x * beta, dim=-1) * x_range, dim=-1)
+
+
 def extract_data(filename, drop_long=True):
     if os.path.exists(f".cache/{os.path.basename(filename)}.pk"):
         with open(f".cache/{os.path.basename(filename)}.pk", "rb") as cache_file:
