@@ -11,7 +11,7 @@ data:
   file_format: "*.file_extension"
   divide_dataset_per_gpu: true
 train:
-  num_workers: 4
+  num_workers: 1
   batch_size: 32
   optimizer:
     mode: "adam"
@@ -24,7 +24,7 @@ train:
     max_lr: ${train.optimizer.adam.lr}
     min_lr: 1e-5
 test:
-  num_workers: 4
+  num_workers: 1
   batch_size: 128
 model: ~
 loss:
