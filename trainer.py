@@ -122,7 +122,7 @@ def train_loop(rank, cfg):
             ce(output[..., 0], target[..., 0])
             + ce(output[..., 1], target[..., 1])
             + order_const * torch.mean(torch.log(torch.maximum(start - end, zero) + 1))
-        ) / 3.0
+        ) / cfg.loss.divisor
 
     model = Model(cfg, net_arch, qa_loss, rank)
 
