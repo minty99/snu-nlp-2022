@@ -42,17 +42,34 @@ def test_model(cfg, model, test_loader, writer: Writer):
             # Calculate QA metrics
             batch_size = model_input[0].shape[0]
             num_words = output.shape[1]
+            input_texts = model_input[0]
+
+            start = torch.softmax(output[:, :, 0], dim=1)  # [batch_size, num_words]
+            end = torch.softmax(output[:, :, 1], dim=1)  # [batch_size, num_words]
+            s_rep = start.unsqueeze(dim=2).repeat(1, 1, num_words)  # [batch_size, num_words, num_words]
+            e_rep = end.unsqueeze(dim=1).repeat(1, num_words, 1)  # [batch_size, num_words, num_words]
+            scores = s_rep + e_rep
+            scores = torch.triu(scores)  # [batch_size, num_words, num_words]
+
+            sep_mask = input_texts == sep_token  # [batch_size, num_words]
+            idx = torch.arange(sep_mask.shape[1], 0, -1)
+            tmp = sep_mask * idx
+            paragraph_starts = torch.argmax(tmp, 1) + 1
+            paragraph_starts = (
+                paragraph_starts.unsqueeze(dim=1).unsqueeze(dim=2).repeat(1, num_words, num_words)
+            )  # [batch_size, num_words, num_words]
+            indices1 = torch.arange(num_words).reshape(1, 1, num_words).repeat(batch_size, num_words, 1)
+            scores[indices1 < paragraph_starts] = 0
+            indices2 = torch.arange(num_words).reshape(1, num_words, 1).repeat(batch_size, 1, num_words)
+            scores[indices2 < paragraph_starts] = 0
+
+            scores = scores.reshape(batch_size, -1)
+            max_idx = torch.argmax(scores, dim=1)
+            pred_start = max_idx // num_words
+            pred_end = max_idx % num_words
+
             for i in range(batch_size):
-                input_text = model_input[0][i]
-                start = torch.softmax(output[i, :, 0])  # [num_words]
-                end = torch.softmax(output[i, :, 1])  # [num_words]
-                paragraph_start = input_text.find(sep_token) + 1
-                scores = dict()
-                for j in range(paragraph_start, num_words):
-                    for k in range(j, num_words):
-                        scores[(j, k)] = start[j] + end[k]
-                (pred_start, pred_end), _ = sorted(list(scores.items()))[-1]
-                pred_text = input_text[pred_start : pred_end + 1].tolist()
+                pred_text = input_texts[i][pred_start[i] : pred_end[i] + 1].tolist()
                 decoded_text = tokenizer.decode(pred_text)
                 texts[qa_id[i]] = decoded_text
 

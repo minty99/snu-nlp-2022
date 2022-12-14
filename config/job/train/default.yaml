@@ -28,11 +28,12 @@ test:
   batch_size: 128
 model: ~
 loss:
-  # custom_smoothing:
-  #   - 0.7
-  #   - 0.2
-  #   - 0.1
   divisor: 2.0 # loss = (ce1 + ce2 + ...) / divisor
+  custom_smoothing: false
+  # custom_smoothing:
+  # - 0.7
+  # - 0.2
+  # - 0.1
   order_const: 0.0
 dist:
   master_addr: "localhost"

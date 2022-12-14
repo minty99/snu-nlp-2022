@@ -98,7 +98,7 @@ def train_loop(rank, cfg):
         zero = torch.zeros(start.shape, device=start.device)
         order_const = cfg.loss.order_const
 
-        def smooth(target, num_classes=start.shape[-2]):
+        def smooth(target, num_classes=output.shape[1]):
             t_0 = target[..., 0]  # B
             t_1 = target[..., 1]  # B
             t_0_onehot = F.one_hot(t_0, num_classes)  # B, num_classes
