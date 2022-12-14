@@ -22,7 +22,7 @@ train:
         - 0.999
   scheduler:
     max_lr: ${train.optimizer.adam.lr}
-    min_lr: 1e-5
+    min_lr: 5e-5
 test:
   num_workers: 1
   batch_size: 128
