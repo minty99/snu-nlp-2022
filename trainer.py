@@ -10,6 +10,7 @@ import hydra
 import torch
 import torch.distributed as dist
 import torch.multiprocessing as mp
+import torch.nn.functional as F
 import torchvision
 import yaml
 from hydra.core.hydra_config import HydraConfig
@@ -96,6 +97,26 @@ def train_loop(rank, cfg):
         end = soft_argmax(output[..., 1])
         zero = torch.zeros(start.shape, device=start.device)
         order_const = cfg.loss.order_const
+
+        def smooth(target, num_classes=start.shape[-2]):
+            t_0 = target[..., 0]  # B
+            t_1 = target[..., 1]  # B
+            t_0_onehot = F.one_hot(t_0, num_classes)  # B, num_classes
+            t_1_onehot = F.one_hot(t_1, num_classes)  # B, num_classes
+            smooth_ratio = cfg.loss.custom_smoothing
+            for i, r in enumerate(smooth_ratio):
+                for b in range(t_0_onehot.shape[0]):
+                    if t_0[b] - i >= 0:
+                        t_0_onehot[b, t_0[b] - i] = r
+                    if t_1[b] + i < num_classes:
+                        t_1_onehot[b, t_1[b] + i] = r
+            # normalize
+            t_0_onehot = t_0_onehot / torch.sum(t_0_onehot, dim=-1, keepdim=True)
+            t_1_onehot = t_1_onehot / torch.sum(t_1_onehot, dim=-1, keepdim=True)
+            return torch.stack([t_0_onehot, t_1_onehot], dim=-1)
+
+        if cfg.loss.custom_smoothing is not None:
+            target = smooth(target)
 
         return (
             ce(output[..., 0], target[..., 0])

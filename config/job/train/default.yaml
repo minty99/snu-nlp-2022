@@ -29,6 +29,10 @@ test:
 model: ~
 loss:
   label_smoothing: 0.1
+  custom_smoothing:
+    - 0.7
+    - 0.2
+    - 0.1
 dist:
   master_addr: "localhost"
   master_port: "12355"
