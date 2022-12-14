@@ -70,6 +70,8 @@ def extract_data(filename, drop_long=True):
     dropped_count = 0
     label_changed_count = 0
     total_count = 0
+
+    sep_token = tokenizer.convert_tokens_to_ids("[SEP]")
     for d in data:
         for pair in d["paragraphs"]:
             context = pair["context"]
@@ -84,17 +86,21 @@ def extract_data(filename, drop_long=True):
                 input_encoded = tokenizer.encode(input_str, add_special_tokens=False)
                 attention_mask = [1] * len(input_encoded)
                 total_count += 1
-                if len(input_encoded) > 512:
+                if len(input_encoded) > 511:
                     # print("WARNING: input string token is over 512")
                     # print(f"\t{input_str}")
-                    input_encoded = input_encoded[:512]
-                    attention_mask = attention_mask[:512]
+                    input_encoded = input_encoded[:511]
+                    attention_mask = attention_mask[:511]
+                    input_encoded.append(sep_token)  # add [SEP] at the end
+                    attention_mask.append(1)
                     long_count += 1
                 else:
+                    input_encoded.append(sep_token)  # add [SEP] at the end
+                    attention_mask.append(1)
                     input_encoded += [pad] * (512 - len(input_encoded))
                     attention_mask += [0] * (512 - len(attention_mask))
 
-                first_sep_idx = input_encoded.index(tokenizer.convert_tokens_to_ids("[SEP]"))
+                first_sep_idx = input_encoded.index(sep_token)
                 token_type_ids = [0] * (first_sep_idx + 1) + [1] * (512 - (first_sep_idx + 1))
 
                 # get target start end pos

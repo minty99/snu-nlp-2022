@@ -90,7 +90,7 @@ def train_loop(rank, cfg):
     net_arch = Net_arch(cfg)
 
     def qa_loss(output, target):
-        ce = torch.nn.CrossEntropyLoss(label_smoothing=cfg.loss.label_smoothing)
+        ce = torch.nn.CrossEntropyLoss()
         # [..., 0]: prob for start position prediction
         # [..., 1]: prob for end position prediction
         start = soft_argmax(output[..., 0])
@@ -115,7 +115,7 @@ def train_loop(rank, cfg):
             t_1_onehot = t_1_onehot / torch.sum(t_1_onehot, dim=-1, keepdim=True)
             return torch.stack([t_0_onehot, t_1_onehot], dim=-1)
 
-        if cfg.loss.custom_smoothing is not None:
+        if cfg.loss.custom_smoothing:
             target = smooth(target)
 
         return (
