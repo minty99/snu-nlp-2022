@@ -101,8 +101,8 @@ def train_loop(rank, cfg):
         def smooth(target, num_classes=output.shape[1]):
             t_0 = target[..., 0]  # B
             t_1 = target[..., 1]  # B
-            t_0_onehot = F.one_hot(t_0, num_classes)  # B, num_classes
-            t_1_onehot = F.one_hot(t_1, num_classes)  # B, num_classes
+            t_0_onehot = F.one_hot(t_0, num_classes).float()  # B, num_classes
+            t_1_onehot = F.one_hot(t_1, num_classes).float()  # B, num_classes
             smooth_ratio = cfg.loss.custom_smoothing
             for i, r in enumerate(smooth_ratio):
                 for b in range(t_0_onehot.shape[0]):
