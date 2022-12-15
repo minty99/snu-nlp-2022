@@ -1,7 +1,8 @@
 <div align="center">
-    <h1><code>
-        2022-Fall SNU NLP Final Project
-    </h1></code>
+    <h1>
+        Introduction to NLP: Final Project
+        @ SNU (2022 Fall)
+    </h1>
 </div>
 
 ## Introduction
