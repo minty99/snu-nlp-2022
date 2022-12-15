@@ -5,6 +5,11 @@
     </h1>
 </div>
 
+## Team Members
+
+- Muhwan Kim (SNUCSE 17)
+- Changmin Choi (SNUCSE 17)
+
 ## Introduction
 
 - Fine-tuning Google's multilingual BERT for Korean question answering task.
@@ -14,8 +19,8 @@
 
 - `config` dir: directory for config files.
 - `dataset` dir: dataloader and dataset codes are here.
-  - `meta` dir: actual dataset JSON file
-    - Downloaded from https://korquad.github.io/KorQuad%201.0/
+  - `meta` dir: actual dataset JSON file.
+    - Downloaded from [KorQuAD 1.0](https://korquad.github.io/KorQuad%201.0)
 - `model` dir
   - `model.py` is for wrapping network architecture.
   - `model_arch.py` is for coding network architecture.
@@ -24,7 +29,7 @@
     - `utils.py` is for utility. random seed setting, get BERT Model, soft argmax, etc.
     - `writer.py` is for writing logs in tensorboard / wandb.
     - `evaluate.py` is the official evaluation script from KorQuAD 1.0 dataset authors.
-      - Downloaded from https://korquad.github.io/KorQuad%201.0/
+      - Downloaded from [KorQuAD 1.0](https://korquad.github.io/KorQuad%201.0)
 - `trainer.py` file: this is for setting up and iterating epoch.
 
 ## Setup
@@ -46,12 +51,13 @@
     - `divisor`: divisor of sum of loss values
     - `custom_smoothing`: list of decreasing values which is used for smoohted target values. This value is applied before 'start' target value and after 'end' target value
     - `order_const`: scale constant of ordering constraint loss
-        - order_const * mean(log(max(start_pred - end_pred, 0) + 1))
+      - order_const * mean(log(max(start_pred - end_pred, 0) + 1))
+- You should turn off `log.use_wandb` option if you don't use wandb.
+  - If `log.use_wandb` is set, error occurs if no valid wandb credential found.
 
 ### Code lint
 
 1. `poetry install` for install develop dependencies
-
 1. `pre-commit install` for adding pre-commit to git hook
 
 ## Train
@@ -61,4 +67,5 @@
 ## Reference
 
 - https://github.com/ryul99/pytorch-project-template
-    - Code Template / Authored by team member (Changmin Choi)
+  - Open-sourced PyTorch project template
+    - authored by team member (Changmin Choi)
