@@ -2,9 +2,9 @@
 name: "NLP Final Project"
 working_dir: ???
 device: "cuda"
-random_seed: ~
+random_seed: 42
 start_time: ~
-num_epoch: 3 # max iteration
+num_epoch: 8 # max iteration
 data:
   train_file: "dataset/meta/KorQuAD_v1.0_train.json"
   test_file: "dataset/meta/KorQuAD_v1.0_dev.json"
@@ -22,7 +22,7 @@ train:
         - 0.999
   scheduler:
     max_lr: ${train.optimizer.adam.lr}
-    min_lr: 5e-5
+    min_lr: 1e-5
 test:
   num_workers: 1
   batch_size: 128
@@ -31,9 +31,9 @@ loss:
   divisor: 2.0 # loss = (ce1 + ce2 + ...) / divisor
   custom_smoothing: false
   # custom_smoothing:
-  # - 0.7
-  # - 0.2
-  # - 0.1
+  #   - 0.95
+  #   - 0.03
+  #   - 0.02
   order_const: 0.0
 dist:
   master_addr: "localhost"
