@@ -14,7 +14,8 @@
 
 - `config` dir: directory for config files.
 - `dataset` dir: dataloader and dataset codes are here.
-  - `meta` dir: actual dataset JSON file (Downloaded from https://korquad.github.io/KorQuad%201.0/)
+  - `meta` dir: actual dataset JSON file
+    - Downloaded from https://korquad.github.io/KorQuad%201.0/
 - `model` dir
   - `model.py` is for wrapping network architecture.
   - `model_arch.py` is for coding network architecture.
@@ -22,7 +23,8 @@
     - `train_model.py` and `test_model.py` are for train and test model once.
     - `utils.py` is for utility. random seed setting, get BERT Model, soft argmax, etc.
     - `writer.py` is for writing logs in tensorboard / wandb.
-    - `evaluate.py` is the official evaluation script from KorQuAD 1.0 dataset authors. (Downloaded from https://korquad.github.io/KorQuad%201.0/)
+    - `evaluate.py` is the official evaluation script from KorQuAD 1.0 dataset authors.
+      - Downloaded from https://korquad.github.io/KorQuad%201.0/
 - `trainer.py` file: this is for setting up and iterating epoch.
 
 ## Setup
